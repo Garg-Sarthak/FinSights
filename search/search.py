@@ -25,13 +25,14 @@ def search_vector_database(query_text:str,company:str,top_n=10,year=None):
         print("embedding queries ended...")
 
         # top = client.get_collection("filings").query(query_texts=query_text,n_results=top_n)
-        top = client.get_collection("labeled_chunks").get(
-                                                     where={"company":"apple"}
+        top = client.get_collection("labeled_chunks").query(query_embeddings=embeddings,
+                                                            n_results=top_n,
+                                                     where={"company":company.lower()}
                                                     )
         return top 
     except Exception as e:
         print(f"Error while searching vector database : {e}")
 
 if __name__ == "__main__":
-    print(search_vector_database("the rise in profits is sharp",company='apple',top_n=1))
+    print(search_vector_database("the rise in profits is sharp",company='infosys',top_n=1))
 

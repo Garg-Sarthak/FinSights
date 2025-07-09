@@ -1,9 +1,15 @@
-from loader import extract_text_from_pdf
-from splitter import chunk_text
-from embedder import embed_chunks
-from store import store_chunks
-from assign_sections import assign_sections_to_chunks
-from store import store_labeled_chunks_from_embeddings
+from .loader import extract_text_from_pdf
+from .splitter import chunk_text
+from .embedder import embed_chunks
+from .store import store_chunks
+from .assign_sections import assign_sections_to_chunks
+from .store import store_labeled_chunks_from_embeddings
+
+import os
+
+
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 pdf_path = "../data/raw/aapl_2023.pdf"
 print("here")

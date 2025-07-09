@@ -1,6 +1,4 @@
-from loader import extract_text_from_pdf
-from embedder import embed_chunks
-from splitter import chunk_text
+
 from sentence_transformers import SentenceTransformer
 import chromadb
 from langchain_text_splitters import SentenceTransformersTokenTextSplitter, SpacyTextSplitter
