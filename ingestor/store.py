@@ -7,12 +7,50 @@ import uuid
 
 
 path = dotenv.get_key("../.env",key_to_get="path")
-def setup_init():
+
+def initialise_client():
     # client = chromadb.Client(Settings(persistent_directory))
     persistent_client = chromadb.PersistentClient(path=path or "../db")
-    collection = persistent_client.get_or_create_collection(name="filings")
-    return collection
+    return persistent_client
 
+def store_labeled_chunks_from_embeddings(
+    labeled_chunks,
+    collection_name,
+    company=None,
+    year=None,
+    source=None
+):
+    client = initialise_client()
+    collection = client.get_or_create_collection(name=collection_name)
+    # collection = initialise_client(collection_name)
+    # collection = client.get_or_create_collection(name=collection_name)
+
+    documents = []
+    embeddings = []
+    metadatas = []
+    ids = []
+
+    for idx, chunk in enumerate(labeled_chunks):
+        documents.append(chunk["chunk"])
+        embeddings.append(chunk["embedding"]) 
+        ids.append(str(uuid.uuid4()))
+
+        metadatas.append({
+            "section": chunk["assigned_sections"][0],  # assuming top-1 section
+            "company": company,
+            "year": year,
+            "source": source,
+            "position": idx
+        })
+
+    collection.add(
+        documents=documents,
+        embeddings=embeddings,
+        ids=ids,
+        metadatas=metadatas
+    )
+
+    print(f" Stored {len(documents)} labeled chunks with precomputed embeddings in '{collection_name}'")
 
 def store_chunks(chunks, embeddings, metadata):
     collection = setup_init()
@@ -42,42 +80,6 @@ def store_chunks(chunks, embeddings, metadata):
         ]
     )
 
-def store_labeled_chunks_from_embeddings(
-    labeled_chunks,
-    collection_name="labeled_chunks",
-    company=None,
-    year=None,
-    source=None
-):
-    client = chromadb.Client()
-    collection = client.get_or_create_collection(name=collection_name)
-
-    documents = []
-    embeddings = []
-    metadatas = []
-    ids = []
-
-    for idx, chunk in enumerate(labeled_chunks):
-        documents.append(chunk["chunk"])
-        embeddings.append(chunk["embedding"])  # embedding already exists
-        ids.append(str(uuid.uuid4()))
-
-        metadatas.append({
-            "section": chunk["assigned_sections"][0],  # assuming top-1 section
-            "company": company,
-            "year": year,
-            "source": source,
-            "position": idx
-        })
-
-    collection.add(
-        documents=documents,
-        embeddings=embeddings,
-        ids=ids,
-        metadatas=metadatas
-    )
-
-    print(f" Stored {len(documents)} labeled chunks with precomputed embeddings in '{collection_name}'")
 
 
 

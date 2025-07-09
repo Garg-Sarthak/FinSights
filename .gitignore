@@ -4,3 +4,5 @@ venv
 __pycache__
 .env
 chroma
+parser.py
+*/parser.py
