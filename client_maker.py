@@ -6,3 +6,5 @@ def get_client():
     client = genai.Client(api_key=api_key)
     return client
 
+print("a")
+
