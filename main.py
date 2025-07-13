@@ -6,6 +6,7 @@ from ingestor.splitter import chunk_text
 from ingestor.embedder import embed_chunks
 from ingestor.assign_sections import assign_sections_to_chunks
 from ingestor.store import store_labeled_chunks_from_embeddings
+
 from search.intelli_search import get_section_chunks
 from llm_functions.summarise import summarise_section, compare_sections
 

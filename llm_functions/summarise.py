@@ -44,14 +44,14 @@ def summarise_section(chunks:Dict[int,List[str]],company:str,years:List[int],sec
 
             # chunk_text = "\n".join(chunk)
             for batch_text in batches:
-                map_prompt = f"Summarize the key points in the following text excerpt focus mainly on the topic {section} (this process is under a batching mechanism which will be used lastly for analysis, so try to not miss out on any information): \n\n{batch_text}"
+                map_prompt = f"Summarize the key points in the following text excerpt focus mainly on the topic {section} (this process is under a batching mechanism which will be used lastly for analysis, so try to not miss out on any information, specially if it is related to numbers). DON'T OMMIT OUT ANY FACT OF FINANCIAL INTEREST, SPECIFICALLY DATA WHICH IS SUPPOSEDLY UNDER FINANCIAL STATEMENTS: \n\n{batch_text}"
                 map_response = client.models.generate_content(model="gemini-2.5-flash",contents=map_prompt,
                                                               config=types.GenerateContentConfig(max_output_tokens=(int)(SAFE_TOKEN_LIMIT)))
                 intermediate_summaries.append(map_response.text)
             
 
             combined_summary_text = "\n".join(intermediate_summaries)
-            system_prompt = f"You are a SENIOR FINANCIAL ANALYST. Based on the following text ONLY under '{section.capitalize()}' disclosed by {company.capitalize()} in their {year} annual report. You are supposed to create an EXTENSIVE but CONCISE summary for it. If the RELEVANT content is not in text, say the data provided is insufficient, and move on. DON'T make ASSUMPTIONS. Provide it as a formal output, don't tell I am AI, or I will do this and this, just come to the main point instantly, with a concise heading"
+            system_prompt = f"You are a SENIOR FINANCIAL ANALYST. Based on the following text ONLY under '{section.capitalize()}' disclosed by {company.capitalize()} in their {year} annual report. You are supposed to create an EXTENSIVE but CONCISE summary for it. In case, the section is related to financial statements, try to be as extensive as possible, don't miss out on any facts of accounting or financial interest, otherwise you can be a bit more concise. If the RELEVANT content is not in text, say the data provided is insufficient, and move on. DON'T make ASSUMPTIONS. Provide it as a formal output, don't tell I am AI, or I will do this and this, just come to the main point instantly, with a concise heading"
             response = client.models.generate_content(
                 model="gemini-2.5-flash",
                 contents=combined_summary_text,
@@ -101,6 +101,7 @@ def compare_sections(summaries_by_year: Dict[int, str], company: str, section: s
         under the section {section},
         for the years : {years}.
         You are required to compare and analyse them and generate a bullet-point comparison. 
+        In case, the section is related to financial statements or accounting information, your answer will be used to find information related to fundamental/financial analysis, so answer in accordance.
         Explicitly label changes as 'ADDED', 'REMOVED', or 'MODIFIED'. Focus only on significant differences.
         Keep the result extensive, but concise, to the point.
         Don't assume any other unobvious data, only do what ever is possible from the provided data.
