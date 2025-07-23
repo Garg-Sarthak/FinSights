@@ -5,6 +5,9 @@ from langchain_text_splitters import SentenceTransformersTokenTextSplitter, Spac
 
 
 def add_sections_to_embeddings():
+    """
+    store description of potential sections within an ephemeral chromadb instance, for matching them with chunks in future
+    """
     CANONICAL_SECTIONS = {
         "business_overview": "Overview of the company's business, operations, core products/services, markets served, and strategic vision.",
         
@@ -12,9 +15,7 @@ def add_sections_to_embeddings():
         
         "risk_factors": "Discussion of key risks, competitive threats, market uncertainties, and factors that could adversely affect performance.",
         
-        "financial_highlights": "High-level summary of financial metrics such as revenue, EBITDA, margins, EPS, etc., typically discussed at the start of calls.",
-        
-        "financial_statements": "Tabular and textual presentation of balance sheet, income statement, cash flow statement, and supporting financial notes.",
+        "financial_statements": "High-level summary of financial metrics such as revenue, EBITDA, margins, EPS, etc., typically discussed at the start of calls. Tabular and textual presentation of balance sheet, income statement, cash flow statement, and supporting financial notes.",
         
         "legal_proceedings": "Details of current or potential lawsuits, regulatory investigations, or legal disputes involving the company.",
         
@@ -28,27 +29,15 @@ def add_sections_to_embeddings():
         
         "capital_allocation": "Commentary on share buybacks, dividends, debt issuance/repayment, or capital expenditure strategies.",
         
-        "esg_and_sustainability": "Environmental, social, and governance (ESG) initiatives, goals, disclosures, and impact reporting.",
-        
-        "executive_commentary": "Prepared remarks by CEO, CFO, or other executives typically given at the beginning of earnings calls.",
-        
-        "qna_session": "Unscripted analyst Q&A session, including responses from executives to investor/analyst questions.",
-        
         "segment_reporting": "Breakdown of performance by business unit, geography, or product category with segment-specific commentary.",
         
         "revenue_drivers": "Detailed discussion of revenue growth drivers, including pricing, volume, customer trends, and product mix shifts.",
         
         "cost_and_margin_analysis": "Insights into COGS, SG&A, operating margins, and any material changes in expense structure.",
-        
-        "liquidity_and_cashflow": "Commentary on working capital, cash reserves, cash generation, and funding plans.",
-        
+    
         "shareholder_updates": "Messages directed at shareholders including investor relations, annual meeting notes, or equity structure changes.",
         
-        "accounting_changes": "Disclosure of changes in accounting policy, restatements, or unusual adjustments affecting financials.",
-        
         "regulatory_updates": "New government policies, compliance mandates, or industry-specific regulation affecting operations.",
-        
-        "human_capital": "Talent strategy, layoffs/hiring, DEI updates, employee productivity, or labor-related discussions.",
         
         "technology_and_innovation": "Commentary on new tech initiatives, digital transformation, software systems, or intellectual property."
     }
@@ -57,6 +46,7 @@ def add_sections_to_embeddings():
     section_names = list(CANONICAL_SECTIONS.keys())
     section_descriptions = list(CANONICAL_SECTIONS.values())
     section_embeddings = model.encode(section_descriptions,show_progress_bar=True)
+
     client = chromadb.Client()
     section_collection = client.get_or_create_collection("section_embeddings")
 
@@ -69,6 +59,7 @@ def add_sections_to_embeddings():
     return section_collection
 
 def assign_sections_to_chunks(chunks, chunk_embeddings, top_k=2, similarity_threshold=0.65):
+    
     section_collection = add_sections_to_embeddings()
     labeled_chunks = []
 

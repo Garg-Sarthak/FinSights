@@ -8,7 +8,7 @@ from ingestor.assign_sections import assign_sections_to_chunks
 from ingestor.store import store_labeled_chunks_from_embeddings
 
 from search.intelli_search import get_section_chunks
-from llm_functions.summarise import summarise_section, compare_sections
+from llm_functions.analysis import summarise_section, compare_sections
 
 import os
 import sys
@@ -17,7 +17,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 def handle_ingestion(file_path: str, company: str, year: str):
     """
     Runs the full data ingestion pipeline for a single PDF document.
+    pdf -> extract text -> semantic chunking -> generate embeddings for chunks -> assign sections -> store labeled chunks -> terminate
     """
+
     print("="*50)
     print(f"Starting ingestion for: {file_path}")
     print(f"Company: {company.capitalize()}, Year: {year}")

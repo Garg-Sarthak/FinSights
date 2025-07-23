@@ -9,7 +9,7 @@ from ingestor.assign_sections import assign_sections_to_chunks
 from ingestor.store import store_labeled_chunks_from_embeddings
 
 from search.intelli_search import get_section_chunks
-from llm_functions.summarise import summarise_section, compare_sections
+from llm_functions.analysis import summarise_section,summarise_sections, compare_sections, get_sentiment, analyze_section_trends
 
 from typing import List
 from pydantic import BaseModel
@@ -65,16 +65,19 @@ async def upload(
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-class CompareBody(BaseModel):
+class AnalysisRequest(BaseModel):
     section : str
     company : str
     years : List[int]
 
-@app.post("/compare")
-async def compare(
-   request :CompareBody
+@app.post("/analyze")
+async def analyse_sections(
+   request :AnalysisRequest
 ):  
     try:
+        if len(request.years) < 2:
+            raise HTTPException(status_code=400, detail="Please provide at least two years for analysis.")
+
         section = request.section
         company = request.company
         years = request.years
@@ -85,19 +88,49 @@ async def compare(
             print("\nError: Could not retrieve document chunks. Please ensure data for all specified years has been ingested.")
             return
 
-        print("\nStep 1 of 2: Generating summaries...")
-        summaries = summarise_section(chunks=section_chunks, company=company, years=years, section=section)
+        print("\nStep 1 of 3: Generating summaries...")
+        summaries = summarise_sections(chunks=section_chunks, company=company, years=years, section=section)
         if not summaries:
             print("\nError: Failed to generate summaries.")
             return
 
-        print("\nStep 2 of 2: Generating comparison...")
-        comparison = compare_sections(summaries_by_year=summaries, company=company, section=section, years=years)
+        print("\nStep 2 of 3: Analyzing sentiment...")
+        sentiment_results = {}
+        for year in request.years:
+            summary_text = summaries.get(year, "") 
+            sentiment_results[year] = get_sentiment(summary_text)
+
+        report_text = ""
+        analysis_type = ""
+        print("\nStep 3 of 3: Analysing...")
+        # comparison = compare_sections(summaries_by_year=summaries, company=company, section=section, years=years)
+        if len(request.years) == 2:
+            print("\nPerforming 2-year comparison...")
+            analysis_type = "comparison"
+            report_text = compare_sections(
+                summaries_by_year=summaries, 
+                company=request.company, 
+                section=request.section, 
+                years=request.years
+            )
+        else:
+            print("\nPerforming multi-year trend analysis...")
+            analysis_type = "trends"
+            report_text = analyze_section_trends(
+                summaries_by_year=summaries, 
+                company=request.company, 
+                section=request.section, 
+                years=request.years
+            )
         
         print("\n" + "="*25 + " ANALYSIS COMPLETE " + "="*25)
-        print(comparison)
+        print()
         print("="*70)
-        return {"comparision_result":comparison}
+        return {
+            "analysis_type": analysis_type,
+            "report": report_text,
+            "sentiment_analysis": sentiment_results
+        }
 
     except Exception as e:
         print(f"\nAn unexpected error occurred during analysis: {e}")
