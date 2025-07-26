@@ -4,11 +4,7 @@ import chromadb
 from langchain_text_splitters import SentenceTransformersTokenTextSplitter, SpacyTextSplitter
 
 
-def add_sections_to_embeddings():
-    """
-    store description of potential sections within an ephemeral chromadb instance, for matching them with chunks in future
-    """
-    CANONICAL_SECTIONS = {
+CANONICAL_SECTIONS = {
         "business_overview": "Overview of the company's business, operations, core products/services, markets served, and strategic vision.",
         
         "management_discussion": "Management's discussion and analysis (MD&A) of financial condition, results of operations, liquidity, and capital resources.",
@@ -41,6 +37,15 @@ def add_sections_to_embeddings():
         
         "technology_and_innovation": "Commentary on new tech initiatives, digital transformation, software systems, or intellectual property."
     }
+
+def get_sections():
+    return CANONICAL_SECTIONS.keys()
+
+def add_sections_to_embeddings():
+    """
+    store description of potential sections within an ephemeral chromadb instance, for matching them with chunks in future
+    """
+    
 
     model = SentenceTransformer("all-MiniLM-L6-v2")
     section_names = list(CANONICAL_SECTIONS.keys())

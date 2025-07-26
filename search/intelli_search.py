@@ -19,6 +19,7 @@ def init_client():
 
 def get_section_chunks(section : str, company : str, years : List[str|int]):
     try:
+        company = company.lower()
         result = {}
         client = init_client()
         collection = client.get_collection("labeled_chunks")

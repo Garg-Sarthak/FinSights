@@ -10,7 +10,7 @@ from ingestor.store import store_labeled_chunks_from_embeddings
 
 from search.intelli_search import get_section_chunks
 from llm_functions.analysis import summarise_section,summarise_sections, compare_sections, get_sentiment, analyze_section_trends
-
+from ingestor.assign_sections import get_sections
 from typing import List
 from pydantic import BaseModel
 
@@ -82,14 +82,17 @@ async def analyse_sections(
         company = request.company
         years = request.years
         # years = years_str.split(sep=',')
+        if section not in get_sections():
+            raise HTTPException(404,"Invalid section mentioned, use only valid section")
         print(f"comparing {section} of {company} for years : {years}")
-        section_chunks = get_section_chunks(section=section, company=company, years=years)
-        if not all(section_chunks.values()):
-            print("\nError: Could not retrieve document chunks. Please ensure data for all specified years has been ingested.")
-            return
+        # section_chunks = get_section_chunks(section=section, company=company, years=years)
+        # if not all(section_chunks.values()):
+        #     print("\nError: Could not retrieve document chunks. Please ensure data for all specified years has been ingested.")
+        #     return
 
         print("\nStep 1 of 3: Generating summaries...")
-        summaries = summarise_sections(chunks=section_chunks, company=company, years=years, section=section)
+        # summaries = summarise_sections(chunks=section_chunks, company=company, years=years, section=section)
+        summaries = summarise_sections(company=company, years=years, section=section)
         if not summaries:
             print("\nError: Failed to generate summaries.")
             return
