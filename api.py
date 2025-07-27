@@ -148,6 +148,7 @@ def agent_query(request : AgentRequest):
     try:
         query = request.query
         result = agent(query=query)
+        result = result.replace('\n','<br>')
         return result
     except Exception as e:
         return HTTPException(404,e)
