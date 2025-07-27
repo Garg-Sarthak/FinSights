@@ -53,7 +53,11 @@ def add_sections_to_embeddings():
     section_embeddings = model.encode(section_descriptions,show_progress_bar=True)
 
     client = chromadb.Client()
-    section_collection = client.get_or_create_collection("section_embeddings")
+    section_collection = client.get_or_create_collection("section_embeddings",configuration={
+        "hnsw":{
+            "space" : "cosine"
+        }
+    })
 
     section_collection.add(
         documents=section_descriptions,
@@ -75,15 +79,15 @@ def assign_sections_to_chunks(chunks, chunk_embeddings, top_k=2, similarity_thre
         )
 
         sections = results["ids"][0]
-        scores = results["distances"][0]
+        scores = results["distances"][0] # 0 to 2
 
         final_labels = []
         for section, distance in zip(sections, scores):
             if distance < (2 - similarity_threshold): 
                 final_labels.append(section)
 
-        if not final_labels:
-            final_labels = ["general_body"]
+        # if not final_labels:
+        #     final_labels = ["general_body"]
 
         labeled_chunks.append({
             "chunk": chunk,

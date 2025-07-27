@@ -11,6 +11,7 @@ from ingestor.store import store_labeled_chunks_from_embeddings
 from search.intelli_search import get_section_chunks
 from llm_functions.analysis import summarise_section,summarise_sections, compare_sections, get_sentiment, analyze_section_trends
 from ingestor.assign_sections import get_sections
+from agents.agent import agent
 from typing import List
 from pydantic import BaseModel
 
@@ -140,6 +141,16 @@ async def analyse_sections(
         # return f"\nAn unexpected error occurred during analysis: {e}"
         raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
 
+class AgentRequest(BaseModel):
+    query : str
+@app.post("/agent_query")
+def agent_query(request : AgentRequest):
+    try:
+        query = request.query
+        result = agent(query=query)
+        return result
+    except Exception as e:
+        return HTTPException(404,e)
 
 
 if __name__ == "__main__":

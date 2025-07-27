@@ -8,13 +8,12 @@ import os
 import sys
 from dotenv import load_dotenv
 import concurrent.futures
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from llm_functions.analysis import summarise_sections, analyze_section_trends, compare_sections, get_sentiment
 from ingestor.assign_sections import get_sections
 
-def __init__():
-    pass
 
 load_dotenv()
 gemini_key = os.getenv("gemini_api_key_3")
