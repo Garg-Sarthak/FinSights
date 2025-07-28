@@ -1,70 +1,72 @@
-# 📊 Earnings-Transcript Delta Insight Engine
+# 🤖 Agent-Driven Qualitative Analysis Platform (FinSights)
 
-An end-to-end, LLM-powered CLI tool for analyzing how key financial sections—like **Risk Factors** and **MD&A**—evolve across years in earnings call transcripts and 10-K filings.
-
----
-
-## ✅ What It Does (Current MVP)
-
-This project is a complete **semantic document intelligence engine** for company filings. It allows structured, multi-year comparison of narrative financial content.
-
-### 🔹 1. Ingestion Pipeline
-- Parses raw PDF documents (10-Ks, earnings transcripts)
-- Recursively chunks and embeds text using `sentence-transformers`
-- Assigns section labels (e.g., *Risk Factors*, *Business Overview*) via semantic similarity
-- Stores enriched chunks with metadata (`company`, `year`, `section`) in **ChromaDB**
-
-### 🔹 2. Insight & Comparison Engine
-- Supports section-level retrieval for a given company and year
-- Runs token-efficient LLM summarization using Gemini (Map-Reduce batching)
-- Highlights **added**, **removed**, and **modified** content between two years
-
-### 🔹 3. CLI Application
-- `ingest`: Fully processes and stores a new financial document
-- `compare`: Compares the same section across any two years and returns a bullet-point delta summary
+An end-to-end, conversational AI platform for analyzing how key financial sections—like **Risk Factors** and **Management's Discussion & Analysis**—evolve across years in earnings call transcripts and 10-K filings. This project has evolved from a simple CLI tool into a full-fledged, API-driven agentic system.
 
 ---
 
-## 🧭 Plannede Future Enhancements
+## ✅ What It Does (Current Version)
 
-These features are not part of the current MVP, but are planned for future iterations:
+This project is a complete **semantic document intelligence platform**. It allows users to ask complex, multi-step, natural language questions about financial documents and receive synthesized insights.
+
+### 🔹 1. Ingestion Pipeline (`POST /ingest`)
+- Ingests raw PDF documents (10-Ks, earnings transcripts) via a FastAPI endpoint.
+- Recursively chunks and embeds text using `sentence-transformers`.
+- Innovated a **dynamic labeling system** that assigns section labels (e.g., *Risk Factors*) via vector similarity search against canonical definitions.
+- Stores enriched chunks with metadata (`company`, `year`, `section`) in **ChromaDB**.
+
+### 🔹 2. Agentic Analysis Engine (`POST /agent_query`)
+- **Multi-Step Conversational Agent:** Built with **LangChain**, the agent can understand complex queries, create a plan, and autonomously use its tools to find an answer.
+- **Specialized Toolkit:** The agent is equipped with a suite of analytical tools for summarization, sentiment analysis (using **FinBERT**), two-year comparisons, and multi-year trend analysis.
+- **Optimized & Performant:** Implements a token-efficient, batched **Map-Reduce** strategy for processing large documents and parallelizes independent tool calls to ensure low-latency responses.
+- **Built-in Guardrails:** A custom system prompt gives the agent a professional persona and strict rules, such as asking for clarification on vague queries and refusing to answer off-topic questions.
+
+### 🔹 3. API-Driven Architecture
+- The entire system is built as a **FastAPI** service, decoupling the backend logic from any specific user interface.
+- Provides endpoints for both document ingestion and conversational analysis.
+
+---
+
+## 🧭 Future Roadmap
+
+With the core agent and API implemented, the next steps focus on usability and production-readiness:
+
+### 🟡 Streamlit User Interface (Next Up)
+- Build a simple, interactive web interface to provide a user-friendly chat experience with the agent and an easy-to-use document uploader.
+
+### 🟡 Asynchronous Ingestion (Celery + Redis)
+- Convert the slow, blocking ingestion process into a non-blocking background job using a Celery task queue with a Redis broker. This will make the application highly responsive.
 
 ### 🟡 Report Generator
-- Export year-over-year delta analysis into clean, professional PDF reports using Markdown → HTML → PDF pipelines
-
-### 🟡 FastAPI Layer
-- Expose the CLI functionality via a Frontend, use Redis + Celery to enable parallel asynchronous processing, increasing the rate at which analysis is possible.
-
-### 🟡 LLM Tool Wrappers & Agents
-- Wrap core functions into LangChain tools for agentic planning and autonomous multi-hop analysis
-
-### 🟡 Advanced NLP Analytics
-- Add sentiment scoring on management commentary 
+- Add a tool to the agent's toolkit that can take a final analysis and format it into a clean, professional PDF report for download.
 
 ---
 
 ## 🔧 Current Tech Stack
 
-- **Python**  
-- **ChromaDB** – for vector storage and filtering  
-- **sentence-transformers** – for semantic chunk embedding  
-- **Gemini API** – for scalable summarization and delta analysis  
+- **Python**
+- **LangChain** – for the core agentic reasoning loop and tool management.
+- **FastAPI** – for the robust, API-driven backend architecture.
+- **ChromaDB** – for vector storage and semantic retrieval.
+- **Google Gemini API** – for scalable summarization and synthesis.
+- **Sentence-Transformers** & **FinBERT** – for embedding and sentiment analysis.
 
 ---
 
 ## 🧠 Why It Matters
 
-Traditional financial document comparison is manual, time-consuming, and error-prone. This project automates the process of understanding **what changed**, **where**, and **why**—giving investors, analysts, and researchers fast, explainable summaries across time.
+Traditional financial document comparison is manual, time-consuming, and limited to keyword searches. This platform automates the process of understanding **what changed**, **where**, and **why**—giving investors and analysts a powerful conversational tool to get fast, synthesized insights across time.
 
 ---
 
-## 📁 Structure
+## 📁 Project Structure
 
 ```bash
 .
-├── ingest.py           # Ingestion pipeline (PDF → ChromaDB)
-├── compare.py          # Section-wise delta analyzer
-├── main.py             # CLI wrapper (Typer)
-├── utils/              # Chunkers, vector utils, labeling logic
-├── store.py            # Storage abstraction over ChromaDB
+├── api.py              # FastAPI server (ingest, analyze, agent endpoints)
+├── agents/
+│   ├── agent.py        # The core agentic loop and custom prompt
+│   ├── tools.py        # The agent's toolkit (summarize, compare, sentiment)
+├── ingestor/           # The complete data ingestion pipeline
+├── search/             # The search functionality based on company, section, etc.
+├── llm_functions/
 └── README.md
